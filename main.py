@@ -60,6 +60,10 @@ while running:
         z.move(-0.5, 0)
         z.draw(screen)
 
+    mx, my = pygame.mouse.get_pos() 
+    hammer_rect = hammer_img.get_rect(center=(mx, my)) 
+    screen.blit(hammer_img, hammer_rect)
+
     pygame.display.flip()
     clock.tick(60)
 
