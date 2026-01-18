@@ -2,6 +2,7 @@ import pygame
 import random
 from settings import *
 from menu import menu
+from zombie import Zombie
 
 pygame.init()
 pygame.mixer.init()
@@ -31,6 +32,7 @@ pygame.mixer.music.load(chosen_track)
 pygame.mixer.music.play(-1)  # loop forever
 pygame.mixer.music.set_volume(0.5)
 
+zomb = Zombie((500, 400))
 # Main loop
 running = True
 while running:
@@ -40,6 +42,9 @@ while running:
 
     # Draw background every frame
     screen.blit(background, (0, 0))
+
+    zomb.move(-0.5, 0)
+    zomb.draw(screen)
 
     pygame.display.flip()
     clock.tick(60)
