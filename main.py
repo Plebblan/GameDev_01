@@ -1,19 +1,22 @@
 import pygame
 import random
 from settings import *
+from menu import menu
 
 pygame.init()
 pygame.mixer.init()
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Whack Clicker")
+screen = pygame.display.set_mode((640, 360))
+(chosen_width, chosen_height), difficulty = menu(screen)
+screen = pygame.display.set_mode((chosen_width, chosen_height))
+pygame.display.set_caption("Zombie Whacker")
 clock = pygame.time.Clock()
 
 # Load background
 background = pygame.image.load(
     "assets/image/background.png"
 ).convert()
-background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+background = pygame.transform.scale(background, (chosen_width, chosen_height))
 
 # Music tracks
 music_tracks = [
