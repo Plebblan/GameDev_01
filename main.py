@@ -13,6 +13,9 @@ screen = pygame.display.set_mode((chosen_width, chosen_height))
 pygame.display.set_caption("Zombie Whacker")
 clock = pygame.time.Clock()
 
+hammer_img = pygame.image.load( "assets/image/hammer/hammer1.png" ).convert_alpha() 
+hammer_img = pygame.transform.smoothscale(hammer_img, (48 * chosen_width/BASE_WIDTH, 64 * chosen_width/BASE_WIDTH)) # adjust size pygame.mouse.set_visible(False)
+
 # Load background
 background = pygame.image.load(
     "assets/image/background.png"
@@ -21,9 +24,9 @@ background = pygame.transform.scale(background, (chosen_width, chosen_height))
 
 # Music tracks
 music_tracks = [
-    "assets/sound/Tracks/21. Loonboon IN-GAME.mp3",
-    "assets/sound/Tracks/25. Ultimate Battle IN-GAME.mp3",
-    "assets/sound/Tracks/29. Brainiac Maniac IN-GAME.mp3"
+    "assets/sound/Tracks/21. Loonboon IN-GAME.ogg",
+    "assets/sound/Tracks/25. Ultimate Battle IN-GAME.ogg",
+    "assets/sound/Tracks/29. Brainiac Maniac IN-GAME.ogg"
 ]
 score = 0
 # Pick and play random track
