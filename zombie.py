@@ -1,13 +1,23 @@
 import pygame
 from utils import load_zombie_frames
 from abc import ABC
+from settings import BASE_X, BASE_Y, BASE_HEIGHT, BASE_WIDTH, BASE_SIZE
 class Zombie(ABC):
-    def __init__(self, position, size=95, directory="assets"):
-        self.position = position
-        self.size = size
-        self.move_sprites = load_zombie_frames("assets/image/basic", "move", size)
-        self.dead_sprites = load_zombie_frames("assets/image/basic", "die", size)
-        self.image = pygame.Surface((size, size))
+    def __init__(self, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
+        """
+        Initialize a Zombie instance.
+        
+        :param self: Description
+        :param position: x position of zombie
+        :param line: y line of zombie (1 - 5)
+        :param resolution: current screen resolution
+        :param directory: Description
+        """
+        self.position = (self.scale(resolution, BASE_X), self.scale(resolution, BASE_Y[line - 1]))
+        self.size = self.scale(resolution, BASE_SIZE)
+        self.move_sprites = load_zombie_frames(directory, "move", self.size)
+        self.dead_sprites = load_zombie_frames(directory, "die", self.size)
+        self.image = pygame.Surface((self.size, self.size))
         self.image.fill((0, 255, 0))  # Green square as placeholder
         self.moving = 0 #index for move animation
         self.dying = 0 #index for dead animation
@@ -20,7 +30,18 @@ class Zombie(ABC):
         :param self: Description
         :param screen: Description
         """
-        screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size // 2)) # Center the image
+        screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size))
+
+    def scale(self, resolution, value):
+        """
+        Scale a value based on current resolution.
+        
+        :param self: Description
+        :param resolution: current screen resolution
+        :param value: value to be scaled
+        """
+        value = int(value * resolution[0] / BASE_WIDTH)
+        return value
     
     def move(self, dx, dy):
         self.position = (self.position[0] + dx, self.position[1] + dy)

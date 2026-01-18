@@ -32,19 +32,28 @@ pygame.mixer.music.load(chosen_track)
 pygame.mixer.music.play(-1)  # loop forever
 pygame.mixer.music.set_volume(0.5)
 
-zomb = Zombie((500, 400))
+zomb = [Zombie(line=1, resolution=(chosen_width, chosen_height)),
+        Zombie(line=2, resolution=(chosen_width, chosen_height)),
+        Zombie(line=3, resolution=(chosen_width, chosen_height)),
+        Zombie(line=4, resolution=(chosen_width, chosen_height)),
+        Zombie(line=5, resolution=(chosen_width, chosen_height))]
 # Main loop
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            #get mouse position
+            mouse_pos = pygame.mouse.get_pos()
+            print(f"Mouse clicked at: {mouse_pos}")
 
     # Draw background every frame
     screen.blit(background, (0, 0))
 
-    zomb.move(-0.5, 0)
-    zomb.draw(screen)
+    for z in zomb:
+        z.move(-0.5, 0)
+        z.draw(screen)
 
     pygame.display.flip()
     clock.tick(60)
