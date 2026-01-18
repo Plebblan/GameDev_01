@@ -22,6 +22,8 @@ background = pygame.image.load(
     "assets/image/background.png"
 ).convert()
 background = pygame.transform.scale(background, (chosen_width, chosen_height))
+screen.blit(background, (0, 0)) 
+pygame.display.flip()
 
 # Music tracks
 music_tracks = [
