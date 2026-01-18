@@ -29,6 +29,8 @@ class Zombie(ABC):
         :param self: Description
         :param screen: Description
         """
+        if self.dying == -1:
+            return
         screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size))
 
     def scale(self, resolution, value):
@@ -52,13 +54,13 @@ class Zombie(ABC):
                     self.moving += 1  # Advance to next move sprite
                 else:
                     self.moving = 0  # Loop back to first move sprite
-            else: #dying animation
+            elif self.dying >= 0: #dying animation
                 self.image = self.dead_sprites[self.dying]
                 if self.dying < len(self.dead_sprites) - 1:
                     self.dying += 1  # Advance to next dead sprite
                 else:
-                    self.dying = len(self.dead_sprites) - 1  # Stay on last dead sprite
-            self.update = 10
+                    self.dying = -1
+            self.update = 3
 
     def change_state(self, state=None):
         """
