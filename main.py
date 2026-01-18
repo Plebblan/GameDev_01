@@ -14,7 +14,8 @@ pygame.display.set_caption("Zombie Whacker")
 clock = pygame.time.Clock()
 
 hammer_img = pygame.image.load( "assets/image/hammer/hammer1.png" ).convert_alpha() 
-hammer_img = pygame.transform.smoothscale(hammer_img, (48 * chosen_width/BASE_WIDTH, 64 * chosen_width/BASE_WIDTH)) # adjust size pygame.mouse.set_visible(False)
+hammer_img = pygame.transform.smoothscale(hammer_img, (48 * chosen_width/BASE_WIDTH, 64 * chosen_width/BASE_WIDTH)) # adjust size 
+pygame.mouse.set_visible(False)
 
 # Load background
 background = pygame.image.load(
