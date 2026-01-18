@@ -18,7 +18,6 @@ class Zombie(ABC):
         self.move_sprites = load_zombie_frames(directory, "move", self.size)
         self.dead_sprites = load_zombie_frames(directory, "die", self.size)
         self.image = pygame.Surface((self.size, self.size))
-        self.image.fill((0, 255, 0))  # Green square as placeholder
         self.moving = 0 #index for move animation
         self.dying = 0 #index for dead animation
         self.update = 0
@@ -79,8 +78,12 @@ class Zombie(ABC):
             self.moving = 0
             self.dying = 0
     
-    def is_hit(self, click_x, click_y):
-        if self.moving < 0:
-            return False
-        hitbox = 
-        if click_x == self.position
+    def is_hit(self, mouse_pos):
+        cur = (self.position[0] - self.size // 2, self.position[1] - self.size)
+        if mouse_pos[0] - cur[0] <= self.size and mouse_pos[0] - cur[0] >= 0 and mouse_pos[1] - cur[1] <= self.size and mouse_pos[1] - cur[1] >= 0:
+            pos_in_ret =  mouse_pos[0] - cur[0], mouse_pos[1] - cur[1]
+            mask = pygame.mask.from_surface(self.image)
+            if mask.get_at(pos_in_ret):
+                return True
+        return False
+        

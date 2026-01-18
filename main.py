@@ -25,7 +25,7 @@ music_tracks = [
     "assets/sound/Tracks/25. Ultimate Battle IN-GAME.mp3",
     "assets/sound/Tracks/29. Brainiac Maniac IN-GAME.mp3"
 ]
-
+score = 0
 # Pick and play random track
 chosen_track = random.choice(music_tracks)
 pygame.mixer.music.load(chosen_track)
@@ -44,10 +44,12 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            #get mouse position
-            mouse_pos = pygame.mouse.get_pos()
-            print(f"Mouse clicked at: {mouse_pos}")
-
+            mouse_pos = event.pos
+            for zom in zomb:
+                if zom.moving >= 0 and zom.is_hit(mouse_pos):
+                    score += 1
+                    zom.change_state("die")
+                    print(f"Hit! Score: {score}")
     # Draw background every frame
     screen.blit(background, (0, 0))
 
