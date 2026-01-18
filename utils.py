@@ -11,7 +11,8 @@ def load_zombie_frames(prefix, state, size = 85):
         real_file = os.path.join(file_path, file)
         if os.path.exists(real_file): 
             img = pygame.image.load(real_file).convert_alpha()
-            frames.append(pygame.transform.scale(img, (size, size)))
+            original_rect = img.get_rect()
+            frames.append(pygame.transform.scale(img, (original_rect.width / original_rect.height * size, size)))
         else:
             print(f"Lỗi: Không tìm thấy file {real_file}")
     return frames
