@@ -1,7 +1,7 @@
 import pygame
 from utils import load_zombie_frames
 from abc import ABC
-from settings import BASE_X, BASE_Y, BASE_SIZE, BASE_WIDTH, BASE_HEIGHT
+from settings import BASE_X, BASE_Y, BASE_HEIGHT, BASE_WIDTH, BASE_SIZE
 class Zombie(ABC):
     def __init__(self, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
         """
@@ -30,7 +30,18 @@ class Zombie(ABC):
         :param self: Description
         :param screen: Description
         """
-        screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size // 2)) # Center the image
+        screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size))
+
+    def scale(self, resolution, value):
+        """
+        Scale a value based on current resolution.
+        
+        :param self: Description
+        :param resolution: current screen resolution
+        :param value: value to be scaled
+        """
+        value = int(value * resolution[0] / BASE_WIDTH)
+        return value
     
     def move(self, dx, dy):
         self.position = (self.position[0] + dx, self.position[1] + dy)
