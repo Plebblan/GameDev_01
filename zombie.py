@@ -109,14 +109,10 @@ class Zombie(ABC):
             self.moving = 0
             self.dying = 0
     
-    def is_hit(self, mouse_pos):
+    def is_hit(self, mouse_pos, hm_hitbox):
         cur = (self.position[0] - self.size // 2, self.position[1] - self.size)
-        if mouse_pos[0] - cur[0] <= self.size and mouse_pos[0] - cur[0] >= 0 and mouse_pos[1] - cur[1] <= self.size and mouse_pos[1] - cur[1] >= 0:
-            pos_in_ret =  mouse_pos[0] - cur[0], mouse_pos[1] - cur[1]
-            mask = pygame.mask.from_surface(self.image)
-            if mask.get_at(pos_in_ret):
-                return True
-        return False
+        hm_LD  = mouse_pos[0] - cur[0] - hm_hitbox // 2, mouse_pos[1] - cur[1] - hm_hitbox // 2
+        return hm_LD[0] + hm_hitbox > 0 and self.size > hm_LD[0] and hm_LD[1] + hm_hitbox > 0 and self.size > hm_LD[1]
     
     def spawn(self, resolution=(BASE_WIDTH, BASE_HEIGHT)):
         if self.moving == -1 and self.dying == -1:
