@@ -112,8 +112,10 @@ class Zombie(ABC):
     def is_hit(self, mouse_pos, hm_hitbox):
         cur = (self.position[0] - self.size // 2, self.position[1] - self.size)
         hm_LD  = mouse_pos[0] - cur[0] - hm_hitbox // 2, mouse_pos[1] - cur[1] - hm_hitbox // 2
+        hammer_rect = pygame.Rect(hm_LD[0], hm_LD[1], hm_hitbox / 2, hm_hitbox / 2)
         bounding_rect = self.image.get_bounding_rect()
-        return hm_LD[0] + hm_hitbox - 10 > bounding_rect[0] and bounding_rect[0] + bounding_rect[2] > hm_LD[0] - 10 and hm_LD[1] + hm_hitbox > bounding_rect[1] and bounding_rect[1] + bounding_rect[3] > hm_LD[1]
+        # return hm_LD[0] + hm_hitbox - 10 > bounding_rect[0] and bounding_rect[0] + bounding_rect[2] > hm_LD[0] - 10 and hm_LD[1] + hm_hitbox > bounding_rect[1] and bounding_rect[1] + bounding_rect[3] > hm_LD[1]
+        return hammer_rect.colliderect(bounding_rect)
     
     def spawn(self, resolution=(BASE_WIDTH, BASE_HEIGHT)):
         if self.moving == -1 and self.dying == -1:
