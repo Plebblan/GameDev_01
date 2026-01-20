@@ -16,7 +16,7 @@ clock = pygame.time.Clock()
 # hammer_img = pygame.image.load( "assets/image/hammer/hammer1.png" ).convert_alpha()
 # hammer_img = pygame.transform.smoothscale(hammer_img, (48 * chosen_width/BASE_WIDTH, 64 * chosen_width/BASE_WIDTH)) # adjust size
 
-hammer = Hammer(pygame.mouse.get_pos(), (48 * chosen_width/BASE_WIDTH, 64 * chosen_width/BASE_WIDTH))
+hammer = Hammer(pygame.mouse.get_pos(), (48 * chosen_width/BASE_WIDTH, 48 * chosen_width/BASE_WIDTH))
 
 pygame.mouse.set_visible(False)
 

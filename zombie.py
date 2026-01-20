@@ -5,7 +5,7 @@ from abc import ABC
 from settings import BASE_X, BASE_Y, BASE_HEIGHT, BASE_WIDTH, BASE_SIZE
 
 class Hammer(ABC):
-    def __init__(self, position = (0, 0), size=(48, 64), directory="assets/image/hammer"):
+    def __init__(self, position = (0, 0), size=(48, 48), directory="assets/image/hammer"):
         self.frames = load_hammer_frames(directory, size)
         self.position = position
         self.state = 0
@@ -112,7 +112,8 @@ class Zombie(ABC):
     def is_hit(self, mouse_pos, hm_hitbox):
         cur = (self.position[0] - self.size // 2, self.position[1] - self.size)
         hm_LD  = mouse_pos[0] - cur[0] - hm_hitbox // 2, mouse_pos[1] - cur[1] - hm_hitbox // 2
-        return hm_LD[0] + hm_hitbox > 0 and self.size > hm_LD[0] and hm_LD[1] + hm_hitbox > 0 and self.size > hm_LD[1]
+        bounding_rect = self.image.get_bounding_rect()
+        return hm_LD[0] + hm_hitbox > bounding_rect[0] and bounding_rect[0] + bounding_rect[2] > hm_LD[0] and hm_LD[1] + hm_hitbox > bounding_rect[1] and bounding_rect[1] + bounding_rect[2] > hm_LD[1]
     
     def spawn(self, resolution=(BASE_WIDTH, BASE_HEIGHT)):
         if self.moving == -1 and self.dying == -1:
