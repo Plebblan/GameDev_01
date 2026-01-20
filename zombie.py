@@ -1,7 +1,31 @@
 import pygame
-from utils import load_zombie_frames
+import random
+from utils import *
 from abc import ABC
 from settings import BASE_X, BASE_Y, BASE_HEIGHT, BASE_WIDTH, BASE_SIZE
+
+class Hammer(ABC):
+    def __init__(self, position = (0, 0), size=(48, 64), directory="assets/image/hammer"):
+        self.frames = load_hammer_frames(directory, size)
+        self.position = position
+        self.state = 0
+    
+    def draw(self, screen):
+        curr = self.frames[self.state]
+        cur_rect = curr.get_rect(center=self.position)
+        screen.blit(self.frames[self.state], cur_rect)
+        if self.state == len(self.frames) - 1:
+            self.state = 0
+        if self.state > 0:
+            self.state += 1
+    
+    def change_state(self):
+        if (self.state == 0):
+            self.state += 1
+    
+    def move(self, pos):
+        self.position = pos
+
 class Zombie(ABC):
     def __init__(self, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
         """
@@ -18,8 +42,8 @@ class Zombie(ABC):
         self.move_sprites = load_zombie_frames(directory, "move", self.size)
         self.dead_sprites = load_zombie_frames(directory, "die", self.size)
         self.image = pygame.Surface((self.size, self.size))
-        self.moving = 0 #index for move animation
-        self.dying = 0 #index for dead animation
+        self.moving = -1 #index for move animation
+        self.dying = -1 #index for dead animation
         self.update = 0
 
     def draw(self, screen):
@@ -45,7 +69,10 @@ class Zombie(ABC):
         return value
     
     def move(self, dx, dy):
-        self.position = (self.position[0] + dx, self.position[1] + dy) if self.moving != -1 else self.position
+        if self.moving >= 0:
+            self.position = (self.position[0] + dx, self.position[1] + dy)
+        else: 
+            self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
         if self.update < 0:
             if self.moving >= 0:
@@ -70,13 +97,15 @@ class Zombie(ABC):
         :param state: New state for the zombie
         """
         if state == "walk":
-            self.moving = 1
+            self.moving = 0
             self.dying = 0
+            return 1
         elif state == "die":
             self.moving = -1
             self.dying = 0
+            return -1
         else:
-            return
+            return 0
             self.moving = 0
             self.dying = 0
     
@@ -88,4 +117,19 @@ class Zombie(ABC):
             if mask.get_at(pos_in_ret):
                 return True
         return False
-        
+    
+    def spawn(self, resolution=(BASE_WIDTH, BASE_HEIGHT)):
+        if self.moving == -1 and self.dying == -1:
+            magic = random.randint(1, 10)
+            if magic in range(1, 6):
+                self.position = (self.scale(resolution, BASE_X), self.scale(resolution, BASE_Y[magic - 1]))
+                return self.change_state("walk")
+            else:
+                return 0
+        return 0
+    
+class Cony(Zombie):
+    def __init__(self, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
+        super().__init__(position, line, resolution, directory)
+        self.move_base = load_zombie_frames(size=self.size)
+        self.move_normal = self.move_sprites

@@ -5,7 +5,7 @@ import glob
 tracking = {
 }
 
-def load_zombie_frames(prefix, state, size = 85):
+def load_zombie_frames(prefix="assets/image/basic", state="move", size = 60):
     frames = tracking.get(prefix + state, [])
     if len(frames) > 0:
         return frames
@@ -23,6 +23,22 @@ def load_zombie_frames(prefix, state, size = 85):
         else:
             print(f"Lỗi: Không tìm thấy file {real_file}")
     tracking[prefix + state] = frames
+    return frames
+
+def load_hammer_frames(directory, size=(48,64)):
+    file_list = list(os.listdir(directory))
+    file_list = sorted(file_list, key=lambda x: (len(x), x))
+    frames = []
+    for file in file_list:
+        if not file.endswith(".png"):
+            continue
+        real_file = os.path.join(directory, file)
+        if os.path.exists(real_file):
+            img = pygame.image.load(real_file).convert_alpha()
+            frames.append(pygame.transform.smoothscale(img, size))
+        else:
+            print(f"File {real_file} not exist")
+    
     return frames
 
 # Bước 3: Nạp tài nguyên (Sau khi đã có screen)
