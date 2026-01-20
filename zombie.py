@@ -45,7 +45,7 @@ class Zombie(ABC):
         return value
     
     def move(self, dx, dy):
-        self.position = (self.position[0] + dx, self.position[1] + dy)
+        self.position = (self.position[0] + dx, self.position[1] + dy) if self.moving != -1 else self.position
         self.update-=1
         if self.update < 0:
             if self.moving >= 0:
