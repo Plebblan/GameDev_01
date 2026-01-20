@@ -25,7 +25,7 @@ def load_zombie_frames(prefix="assets/image/basic", state="move", size = 60):
     tracking[prefix + state] = frames
     return frames
 
-def load_hammer_frames(directory, size=(48,48)):
+def load_hammer_frames(directory, size=(40,40)):
     file_list = list(os.listdir(directory))
     file_list = sorted(file_list, key=lambda x: (len(x), x))
     frames = []

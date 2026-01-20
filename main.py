@@ -16,7 +16,7 @@ clock = pygame.time.Clock()
 # hammer_img = pygame.image.load( "assets/image/hammer/hammer1.png" ).convert_alpha()
 # hammer_img = pygame.transform.smoothscale(hammer_img, (48 * chosen_width/BASE_WIDTH, 64 * chosen_width/BASE_WIDTH)) # adjust size
 
-hammer = Hammer(pygame.mouse.get_pos(), (48 * chosen_width/BASE_WIDTH, 48 * chosen_width/BASE_WIDTH))
+hammer = Hammer(pygame.mouse.get_pos(), (40 * chosen_width/BASE_WIDTH, 40 * chosen_width/BASE_WIDTH))
 
 pygame.mouse.set_visible(False)
 
@@ -66,7 +66,7 @@ while running:
             hammer.change_state()
             mouse_pos = event.pos
             for zom in zomb:
-                if zom.moving >= 0 and zom.is_hit(mouse_pos, 48 * chosen_width/BASE_WIDTH):
+                if zom.moving >= 0 and zom.is_hit(mouse_pos, 30 * chosen_width/BASE_WIDTH):
                     score += 1
                     num += zom.change_state("die")
                     print(f"Hit! Score: {score}")
