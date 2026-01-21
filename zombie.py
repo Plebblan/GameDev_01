@@ -2,10 +2,10 @@ import pygame
 import random
 from utils import *
 from abc import ABC
-from settings import BASE_X, BASE_Y, BASE_HEIGHT, BASE_WIDTH, BASE_SIZE
+from settings import *
 
 class Hammer(ABC):
-    def __init__(self, position = (0, 0), size=(40, 40), directory="assets/image/hammer"):
+    def __init__(self, position = (0, 0), size=(BASE_HAMMER, BASE_HAMMER), directory="assets/image/hammer"):
         self.frames = load_hammer_frames(directory, size)
         self.position = position
         self.state = 0
