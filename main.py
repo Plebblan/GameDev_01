@@ -90,7 +90,7 @@ while running:
                     if not isinstance (zom, Dancer):
                         num += zom.change_state("die")
                     elif zom.moving == -1:
-                        num += zom.change_state("die")
+                        num -= 1
                     print(f"Hit! Score: {score}")
     # Draw background every frame
     screen.blit(background, (0, 0))

@@ -277,12 +277,12 @@ class Dancer(Zombie):
         hammer_rect = pygame.Rect(hm_LD[0], hm_LD[1], hm_hitbox / 2, hm_hitbox / 2)
         bounding_rect = self.image.get_bounding_rect()
         value = hammer_rect.colliderect(bounding_rect)
-        if value:
+        if value and self.moving != -1:
             self.change_state("die")
         dead_list = []
         for idx in self.summon_creep:
-            value = self.creeps[idx].is_hit(mouse_pos, hm_hitbox)
-            if value:
+            var = self.creeps[idx].is_hit(mouse_pos, hm_hitbox)
+            if var:
                 self.creeps[idx].change_state("die")
                 value = True
                 dead_list += [idx]
