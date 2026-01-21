@@ -155,7 +155,7 @@ class Creep(Zombie):
                     self.summon_idx = -1  
                     self.summoned_flag = True
                     self.change_state("walk")
-            if self.moving >= 0:
+            elif self.moving >= 0:
                 self.image = self.move_sprites[self.moving]
                 if self.moving < len(self.move_sprites) - 1:
                     self.moving += 1  # Advance to next move sprite
@@ -196,6 +196,8 @@ class Creep(Zombie):
         elif state == "summon":
             self.summoned_flag = False
             self.summon_idx = 0
+            self.moving = 0
+            self.dying = -1
         else:
             return 0
             self.moving = 0
@@ -230,7 +232,7 @@ class Dancer(Zombie):
         if self.cd > 0:
             self.cd -= 1
             return
-        self.cd = 50
+        self.cd = 360
         if self.moving == -1:
             return
         for idx, creep in enumerate(self.creeps):

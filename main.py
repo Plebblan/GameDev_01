@@ -104,7 +104,7 @@ while running:
     for z in zomb:
         num += z.spawn(resolution=(chosen_width, chosen_height))
         z.move(-0.5, 0)
-        if isinstance(z, Dancer):
+        if isinstance(z, Dancer) and z.moving != -1:
             z.summon()
         z.draw(screen)
     #draw fog screen
