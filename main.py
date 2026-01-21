@@ -32,18 +32,29 @@ fog_images = [
     for i in range(1, 9)
 ]
 fog_particles = []
-lanes = BASE_Y
+lanes = [int(y * chosen_height/360) for y in BASE_Y]
+fog_bound = pygame.Rect(
+    FOG_X * chosen_width/640,
+    0,
+    chosen_width - FOG_X * chosen_width/640,
+    chosen_height
+)
 
 for lane_y in lanes:
-    for i in range(5):
+    for i in range(6):
         x = int(chosen_width * (FOG_LEFT + (i + 0.5) * (1 - FOG_LEFT) / 5))
         img = random.choice(fog_images)
 
+        #scale fog image
+        scale_x = chosen_width / BASE_WIDTH
+        scale_y = chosen_height / BASE_HEIGHT
         scale = random.uniform(0.7, 1.2)
         img = pygame.transform.smoothscale(
             img,
-            (int(img.get_width() * scale),
-             int(img.get_height() * scale))
+            (
+                int(img.get_width() * scale * scale_x),
+                int(img.get_height() * scale * scale_y)
+            )
         )
 
         fog_particles.append(FogParticle(x, lane_y, img))
@@ -96,7 +107,7 @@ while running:
 
     #play random groans
     if num > 0:
-        magic = random.randint(1, 75)
+        magic = random.randint(1, 360)
         if magic == 1:
             chosen_groan = random.choice(groan_tracks)
             chosen_groan.play()
@@ -107,7 +118,7 @@ while running:
     #draw fog screen
     for fog in fog_particles:
         fog.update()
-        fog.draw(screen)
+        fog.draw(screen,fog_bound)
 
     hammer.move(pygame.mouse.get_pos())
     hammer.draw(screen)
