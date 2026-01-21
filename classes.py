@@ -278,6 +278,8 @@ class Dancer(Zombie):
         hammer_rect = pygame.Rect(hm_LD[0], hm_LD[1], hm_hitbox / 2, hm_hitbox / 2)
         bounding_rect = self.image.get_bounding_rect()
         value = hammer_rect.colliderect(bounding_rect)
+        if self.moving == -1 and value:
+            value = False
         if value and self.moving != -1:
             self.change_state("die")
         dead_list = []
