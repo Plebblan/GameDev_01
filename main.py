@@ -3,6 +3,7 @@ import random
 from settings import *
 from menu import menu
 from zombie import *
+from fog_particles import *
 
 pygame.init()
 pygame.mixer.init()
@@ -12,9 +13,6 @@ screen = pygame.display.set_mode((640, 360))
 screen = pygame.display.set_mode((chosen_width, chosen_height))
 pygame.display.set_caption("Zombie Whacker")
 clock = pygame.time.Clock()
-
-# hammer_img = pygame.image.load( "assets/image/hammer/hammer1.png" ).convert_alpha()
-# hammer_img = pygame.transform.smoothscale(hammer_img, (48 * chosen_width/BASE_WIDTH, 64 * chosen_width/BASE_WIDTH)) # adjust size
 
 hammer = Hammer(pygame.mouse.get_pos(), (40 * chosen_width/BASE_WIDTH, 40 * chosen_width/BASE_WIDTH))
 
@@ -27,6 +25,28 @@ background = pygame.image.load(
 background = pygame.transform.scale(background, (chosen_width, chosen_height))
 screen.blit(background, (0, 0)) 
 pygame.display.flip()
+
+# Load fog
+fog_images = [
+    pygame.image.load(f"assets/image/fog/fog_{i}.png").convert_alpha()
+    for i in range(1, 9)
+]
+fog_particles = []
+lanes = BASE_Y
+
+for lane_y in lanes:
+    for i in range(5):
+        x = int(chosen_width * (FOG_LEFT + (i + 0.5) * (1 - FOG_LEFT) / 5))
+        img = random.choice(fog_images)
+
+        scale = random.uniform(0.7, 1.2)
+        img = pygame.transform.smoothscale(
+            img,
+            (int(img.get_width() * scale),
+             int(img.get_height() * scale))
+        )
+
+        fog_particles.append(FogParticle(x, lane_y, img))
 
 # Music tracks
 music_tracks = [
@@ -83,12 +103,13 @@ while running:
         num += z.spawn(resolution=(chosen_width, chosen_height))
         z.move(-0.5, 0)
         z.draw(screen)
+    #draw fog screen
+    for fog in fog_particles:
+        fog.update()
+        fog.draw(screen)
 
     hammer.move(pygame.mouse.get_pos())
     hammer.draw(screen)
-    # mx, my = pygame.mouse.get_pos() 
-    # hammer_rect = hammer_img.get_rect(center=(mx, my))
-    # screen.blit(hammer_img, hammer_rect)
 
     pygame.display.flip()
     clock.tick(60)

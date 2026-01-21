@@ -9,6 +9,10 @@ BASE_SIZE = 60
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 360
 
+#Fog bounds
+FOG_LEFT = 0.79
+FOG_RIGHT = 1.10
+
 # Frame rate
 FPS = 60
 
