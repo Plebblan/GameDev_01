@@ -2,7 +2,7 @@ import pygame
 import random
 from settings import *
 from menu import menu
-from zombie import *
+from classes import *
 
 pygame.init()
 pygame.mixer.init()
@@ -54,7 +54,8 @@ zomb = [Zombie(line=1, resolution=(chosen_width, chosen_height)),
         Zombie(line=2, resolution=(chosen_width, chosen_height)),
         Zombie(line=3, resolution=(chosen_width, chosen_height)),
         Zombie(line=4, resolution=(chosen_width, chosen_height)),
-        Zombie(line=5, resolution=(chosen_width, chosen_height))]
+        Zombie(line=5, resolution=(chosen_width, chosen_height)),
+        Dancer(line=3, resolution=(chosen_width, chosen_height))]
 num = 0
 # Main loop
 running = True
@@ -66,9 +67,12 @@ while running:
             hammer.change_state()
             mouse_pos = event.pos
             for zom in zomb:
-                if zom.moving >= 0 and zom.is_hit(mouse_pos, BASE_HITBOX * chosen_width/BASE_WIDTH):
+                if (zom.moving >= 0 or isinstance (zom, Dancer)) and zom.is_hit(mouse_pos, BASE_HITBOX * chosen_width/BASE_WIDTH):
                     score += 1
-                    num += zom.change_state("die")
+                    if not isinstance (zom, Dancer):
+                        num += zom.change_state("die")
+                    elif zom.moving == -1:
+                        num += zom.change_state("die")
                     print(f"Hit! Score: {score}")
     # Draw background every frame
     screen.blit(background, (0, 0))
@@ -82,6 +86,8 @@ while running:
     for z in zomb:
         num += z.spawn(resolution=(chosen_width, chosen_height))
         z.move(-0.5, 0)
+        if isinstance(z, Dancer):
+            z.summon()
         z.draw(screen)
 
     hammer.move(pygame.mouse.get_pos())
