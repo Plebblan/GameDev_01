@@ -24,12 +24,13 @@ class Hammer(ABC):
     def change_state(self):
         self.swing.play()
         if (self.state == 0):
-            self.state += 1
+            self.state += 1  
     
     def move(self, pos):
         self.position = pos
 
 class Zombie(ABC):
+    
     def __init__(self, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
         """
         Initialize a Zombie instance.
@@ -106,7 +107,7 @@ class Zombie(ABC):
         elif state == "die":
             self.moving = -1
             self.dying = 0
-            return -1
+            return -1  
         else:
             return 0
             self.moving = 0

@@ -42,6 +42,12 @@ def load_hammer_frames(directory, size=(BASE_HAMMER, BASE_HAMMER)):
     
     return frames
 
+def tint_add(image, color):
+    """Additive color tint"""
+    tinted = image.copy()
+    tinted.fill(color, special_flags=pygame.BLEND_RGB_ADD)
+    return tinted
+
 # Bước 3: Nạp tài nguyên (Sau khi đã có screen)
 # Lưu ý: Tôi điều chỉnh lại range để không bị trùng lặp các frame
 # try:

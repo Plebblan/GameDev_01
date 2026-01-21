@@ -15,6 +15,17 @@ pygame.display.set_caption("Zombie Whacker")
 clock = pygame.time.Clock()
 
 hammer = Hammer(pygame.mouse.get_pos(), (40 * chosen_width/BASE_WIDTH, 40 * chosen_width/BASE_WIDTH))
+hm_hitbox = int(BASE_HITBOX * chosen_width / BASE_WIDTH)
+
+#init pow effect
+pow = pygame.image.load("assets/image/pow.png").convert_alpha()
+pow = pygame.transform.smoothscale(
+        pow,
+        ((BASE_SIZE*0.7*chosen_width/640),
+        (BASE_SIZE*0.7*chosen_width/640)))
+pow = tint_add(pow, (180, 30, 10))
+pow_timer = 0
+pow_pos = (0, 0)
 
 pygame.mouse.set_visible(False)
 
@@ -31,33 +42,7 @@ fog_images = [
     pygame.image.load(f"assets/image/fog/fog_{i}.png").convert_alpha()
     for i in range(1, 9)
 ]
-fog_particles = []
-lanes = [int(y * chosen_height/360) for y in BASE_Y]
-fog_bound = pygame.Rect(
-    FOG_X * chosen_width/640,
-    0,
-    chosen_width - FOG_X * chosen_width/640,
-    chosen_height
-)
-
-for lane_y in lanes:
-    for i in range(6):
-        x = int(chosen_width * (FOG_LEFT + (i + 0.5) * (1 - FOG_LEFT) / 5))
-        img = random.choice(fog_images)
-
-        #scale fog image
-        scale_x = chosen_width / BASE_WIDTH
-        scale_y = chosen_height / BASE_HEIGHT
-        scale = random.uniform(0.7, 1.2)
-        img = pygame.transform.smoothscale(
-            img,
-            (
-                int(img.get_width() * scale * scale_x),
-                int(img.get_height() * scale * scale_y)
-            )
-        )
-
-        fog_particles.append(FogParticle(x, lane_y, img))
+fog_particles,fog_bound = create_fog_wall(fog_images,chosen_width,chosen_height)
 
 # Music tracks
 music_tracks = [
@@ -97,10 +82,12 @@ while running:
             hammer.change_state()
             mouse_pos = event.pos
             for zom in zomb:
-                if zom.moving >= 0 and zom.is_hit(mouse_pos, BASE_HITBOX * chosen_width/BASE_WIDTH):
+                if zom.moving >= 0 and zom.is_hit(mouse_pos, hm_hitbox):
                     hammer.bonk.play()
                     score += 1
                     num += zom.change_state("die")
+                    pow_timer = 10
+                    pow_pos = mouse_pos
                     print(f"Hit! Score: {score}")
     # Draw background every frame
     screen.blit(background, (0, 0))
@@ -123,6 +110,10 @@ while running:
     hammer.move(pygame.mouse.get_pos())
     hammer.draw(screen)
 
+    if pow_timer > 0:
+        rect = pow.get_rect(center=pow_pos)
+        screen.blit(pow, rect)
+        pow_timer -= 1
     pygame.display.flip()
     clock.tick(60)
 
