@@ -228,6 +228,7 @@ class Dancer(Zombie):
         self.summon_creep = []
         self.summon_flag = False
         self.cd = 20
+
     def summon(self):
         if self.cd > 0:
             self.cd -= 1
@@ -242,6 +243,7 @@ class Dancer(Zombie):
                     self.summon_creep  += [idx]
                     creep.change_state("summon")
                     self.summon_flag = True
+
     def move(self, dx, dy):
         if self.moving >= 0:
             self.position = (self.position[0] + dx, self.position[1] + dy) if not self.summon_flag else self.position
@@ -264,14 +266,16 @@ class Dancer(Zombie):
             self.update = 3
         for creep in self.creeps:
             creep.move(dx, dy)
+
     def draw(self, screen):
-        if self.dying == -1:
-            return
         for creep in self.creeps:
             creep.draw(screen)
+        if self.dying == -1:
+            return
         self.summon_flag = not all(creep.is_summoned() for creep in self.creeps)
 
         screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size))
+
     def is_hit(self, mouse_pos, hm_hitbox):
         cur = (self.position[0] - self.size // 2, self.position[1] - self.size)
         hm_LD  = mouse_pos[0] - cur[0] - hm_hitbox // 2, mouse_pos[1] - cur[1] - hm_hitbox // 2
@@ -292,4 +296,14 @@ class Dancer(Zombie):
         self.summon_creep = [idx for idx in self.summon_creep if idx not in dead_list] 
         return value
         
-            
+    def spawn(self, resolution=(BASE_WIDTH, BASE_HEIGHT)):
+        if len(self.summon_creep) > 0:
+            return 0
+        if self.moving == -1 and self.dying == -1:
+            magic = random.randint(1, 10)
+            if magic in range(1, 6):
+                self.position = (self.scale(resolution, BASE_X), self.scale(resolution, BASE_Y[magic - 1]))
+                return self.change_state("walk")
+            else:
+                return 0
+        return 0
