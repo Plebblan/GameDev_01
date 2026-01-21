@@ -9,7 +9,9 @@ class Hammer(ABC):
         self.frames = load_hammer_frames(directory, size)
         self.position = position
         self.state = 0
-    
+        self.swing = pygame.mixer.Sound("assets/sound/Effect/swing.ogg")
+        self.bonk = pygame.mixer.Sound("assets/sound/Effect/bonk.ogg")
+
     def draw(self, screen):
         curr = self.frames[self.state]
         cur_rect = curr.get_rect(center=self.position)
@@ -20,8 +22,9 @@ class Hammer(ABC):
             self.state += 1
     
     def change_state(self):
+        self.swing.play()
         if (self.state == 0):
-            self.state += 1
+            self.state += 1  
     
     def move(self, pos):
         self.position = pos
