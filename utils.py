@@ -5,7 +5,7 @@ from settings import *
 
 tracking = {
 }
-dirt_sprites = []
+gl_summon_sprites = []
 zom_frame = None
 def load_zombie_frames(prefix="assets/image/basic", state="move", size = 60):
     frames = tracking.get(prefix + state, [])
@@ -28,29 +28,24 @@ def load_zombie_frames(prefix="assets/image/basic", state="move", size = 60):
     return frames
 
 def create_summon_sprites(size = 60):
-    global zom_frame
-    if len(dirt_sprites) > 0:
-        return (dirt_sprites, zom_frame)
-    file_path = "assets/image/dirt_animation"
+    global gl_summon_sprites
+    if len(gl_summon_sprites) > 0:
+        return gl_summon_sprites
+    file_path = "assets/image/backup_summon"
     file_list = list(os.listdir(file_path))
     file_list = sorted(file_list)
+    summon_sprites = []
     for file in file_list:
         if not file.endswith(".png"):
             continue
         real_file = os.path.join(file_path, file)
         if os.path.exists(real_file): 
             img = pygame.image.load(real_file).convert_alpha()
-            dirt_sprites.append(pygame.transform.scale(img, (size/8, size/8)))
+            summon_sprites.append(pygame.transform.scale(img, (size/1.4, size/1.4)))
         else:
             print(f"Lỗi: Không tìm thấy file {real_file}")
-    file_path_zom = "assets/image/creep_backup/move/gotybackup0039.png"
-    if os.path.exists(file_path_zom):
-        img = pygame.image.load(real_file).convert_alpha()
-        frame = pygame.transform.scale(img, (size, size))
-        zom_frame = frame
-    else:
-            print(f"Lỗi: Không tìm thấy file {file_path_zom}")
-    return (dirt_sprites, frame)
+    gl_summon_sprites = summon_sprites
+    return summon_sprites
 
 
 

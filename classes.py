@@ -133,7 +133,7 @@ class Creep(Zombie):
     def __init__(self, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/creep_backup"):
         super().__init__(position, line, resolution, directory)
         self.summoned_flag = True
-        self.dirt_sprites, self.zom_frame = create_summon_sprites(self.size)
+        self.summon_sprites = create_summon_sprites(self.size)
         self.summon_idx = -1
 
     def is_summoned(self):
@@ -149,8 +149,9 @@ class Creep(Zombie):
         self.update-=1
         if self.update < 0:
             if self.summoned_flag == False and self.summon_idx >= 0:
-                if self.summon_idx < len(self.dirt_sprites) - 1:
-                    self.summon_idx += 1  # Advance to next move sprite
+                self.image = self.summon_sprites[int(self.summon_idx)]
+                if self.summon_idx < len(self.summon_sprites) - 1:
+                    self.summon_idx += 0.3
                 else:
                     self.summon_idx = -1  
                     self.summoned_flag = True
@@ -169,15 +170,10 @@ class Creep(Zombie):
                     self.dying = -1
             self.update = 3
     def draw(self, screen):
-        if self.summoned_flag == False and self.summon_idx >= 0:
-            cur =  self.position[0] - self.size // 2, self.position[1] - self.size
-            zom_part = self.zom_frame.subsurface((0, 0, self.size, self.size*self.summon_idx/len(self.dirt_sprites)))
-            screen.blit(zom_part, cur)
-            screen.blit(self.dirt_sprites[self.summon_idx], cur)
-            return
         if self.dying == -1:
             return
-        screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size))
+        else:
+            screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size))
     def change_state(self, state=None):
         """
         Change the state of the zombie (e.g., from moving to dying).
@@ -197,7 +193,7 @@ class Creep(Zombie):
             self.summoned_flag = False
             self.summon_idx = 0
             self.moving = 0
-            self.dying = -1
+            self.dying = 0
         else:
             return 0
             self.moving = 0
