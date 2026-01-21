@@ -74,6 +74,9 @@ class Zombie(ABC):
     def move(self, dx, dy):
         if self.moving >= 0:
             self.position = (self.position[0] + dx, self.position[1] + dy)
+            if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
+                self.change_state("hurt")
+                return -1
         else: 
             self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
@@ -106,6 +109,10 @@ class Zombie(ABC):
         elif state == "die":
             self.moving = -1
             self.dying = 0
+            return -1
+        elif state == "hurt":
+            self.moving = -1
+            self.dying = -1
             return -1
         else:
             return 0
@@ -141,9 +148,12 @@ class Creep(Zombie):
     
     def move(self, dx, dy):
         if self.summoned_flag == False:
-            None
+            pass
         elif self.moving >= 0:
             self.position = (self.position[0] + dx, self.position[1] + dy)
+            if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
+                self.change_state("hurt")
+                return -1
         else: 
             self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
@@ -169,6 +179,7 @@ class Creep(Zombie):
                 else:
                     self.dying = -1
             self.update = 3
+
     def draw(self, screen):
         if self.dying == -1:
             return
@@ -186,6 +197,7 @@ class Creep(Zombie):
             self.dying = 0
             return 1
         elif state == "die":
+            self.summoned_flag = True
             self.moving = -1
             self.dying = 0
             return -1
@@ -194,10 +206,15 @@ class Creep(Zombie):
             self.summon_idx = 0
             self.moving = 0
             self.dying = 0
+        elif state == "hurt":
+            self.summoned_flag = True
+            self.moving = -1
+            self.dying = -1
         else:
             return 0
             self.moving = 0
             self.dying = 0
+
     def set(self, position, idx = 0):
         if idx == 0:
             self.position = position[0], position[1] - self.scale(self.resolution, BASE_Y[1]-BASE_Y[0])
@@ -241,8 +258,12 @@ class Dancer(Zombie):
                     self.summon_flag = True
 
     def move(self, dx, dy):
+        ret = 0
         if self.moving >= 0:
             self.position = (self.position[0] + dx, self.position[1] + dy) if not self.summon_flag else self.position
+            if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
+                self.change_state("hurt")
+                ret -=1
         else: 
             self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
@@ -260,8 +281,11 @@ class Dancer(Zombie):
                 else:
                     self.dying = -1
             self.update = 3
-        for creep in self.creeps:
-            creep.move(dx, dy)
+        for idx, creep in enumerate(self.creeps):
+            if creep.move(dx, dy) == -1:
+                ret -= 1
+                self.summon_creep.remove(idx)
+        return ret
 
     def draw(self, screen):
         for creep in self.creeps:
