@@ -112,13 +112,14 @@ while running:
         fog.update()
         fog.draw(screen,fog_bound)
 
-    hammer.move(pygame.mouse.get_pos())
-    hammer.draw(screen)
-
     if pow_timer > 0:
         rect = pow.get_rect(center=pow_pos)
         screen.blit(pow, rect)
         pow_timer -= 1
+
+    hammer.move(pygame.mouse.get_pos())
+    hammer.draw(screen)
+
     pygame.display.flip()
     clock.tick(60)
 
