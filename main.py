@@ -86,7 +86,8 @@ while running:
             hammer.change_state()
             mouse_pos = event.pos
             for zom in zomb:
-                if zom.moving >= 0 and zom.is_hit(mouse_pos, 30 * chosen_width/BASE_WIDTH):
+                if zom.moving >= 0 and zom.is_hit(mouse_pos, BASE_HITBOX * chosen_width/BASE_WIDTH):
+                    hammer.bonk.play()
                     score += 1
                     num += zom.change_state("die")
                     print(f"Hit! Score: {score}")

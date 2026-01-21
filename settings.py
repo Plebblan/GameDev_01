@@ -4,6 +4,8 @@ BASE_HEIGHT = 360
 BASE_Y = [130, 178, 225, 270, 320]
 BASE_X = 518
 BASE_SIZE = 60
+BASE_HAMMER = 40
+BASE_HITBOX = 30
 
 # Default window resolution (will be overwritten by menu)
 SCREEN_WIDTH = 640

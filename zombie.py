@@ -2,14 +2,16 @@ import pygame
 import random
 from utils import *
 from abc import ABC
-from settings import BASE_X, BASE_Y, BASE_HEIGHT, BASE_WIDTH, BASE_SIZE
+from settings import *
 
 class Hammer(ABC):
-    def __init__(self, position = (0, 0), size=(40, 40), directory="assets/image/hammer"):
+    def __init__(self, position = (0, 0), size=(BASE_HAMMER, BASE_HAMMER), directory="assets/image/hammer"):
         self.frames = load_hammer_frames(directory, size)
         self.position = position
         self.state = 0
-    
+        self.swing = pygame.mixer.Sound("assets/sound/Effect/swing.ogg")
+        self.bonk = pygame.mixer.Sound("assets/sound/Effect/bonk.ogg")
+
     def draw(self, screen):
         curr = self.frames[self.state]
         cur_rect = curr.get_rect(center=self.position)
@@ -20,6 +22,7 @@ class Hammer(ABC):
             self.state += 1
     
     def change_state(self):
+        self.swing.play()
         if (self.state == 0):
             self.state += 1
     
@@ -112,8 +115,10 @@ class Zombie(ABC):
     def is_hit(self, mouse_pos, hm_hitbox):
         cur = (self.position[0] - self.size // 2, self.position[1] - self.size)
         hm_LD  = mouse_pos[0] - cur[0] - hm_hitbox // 2, mouse_pos[1] - cur[1] - hm_hitbox // 2
+        hammer_rect = pygame.Rect(hm_LD[0], hm_LD[1], hm_hitbox / 2, hm_hitbox / 2)
         bounding_rect = self.image.get_bounding_rect()
-        return hm_LD[0] + hm_hitbox - 10 > bounding_rect[0] and bounding_rect[0] + bounding_rect[2] > hm_LD[0] - 10 and hm_LD[1] + hm_hitbox > bounding_rect[1] and bounding_rect[1] + bounding_rect[3] > hm_LD[1]
+        # return hm_LD[0] + hm_hitbox - 10 > bounding_rect[0] and bounding_rect[0] + bounding_rect[2] > hm_LD[0] - 10 and hm_LD[1] + hm_hitbox > bounding_rect[1] and bounding_rect[1] + bounding_rect[3] > hm_LD[1]
+        return hammer_rect.colliderect(bounding_rect)
     
     def spawn(self, resolution=(BASE_WIDTH, BASE_HEIGHT)):
         if self.moving == -1 and self.dying == -1:
@@ -124,9 +129,3 @@ class Zombie(ABC):
             else:
                 return 0
         return 0
-    
-class Cony(Zombie):
-    def __init__(self, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
-        super().__init__(position, line, resolution, directory)
-        self.move_base = load_zombie_frames(size=self.size)
-        self.move_normal = self.move_sprites
