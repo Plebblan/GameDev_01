@@ -9,7 +9,9 @@ class Hammer(ABC):
         self.frames = load_hammer_frames(directory, size)
         self.position = position
         self.state = 0
-    
+        self.swing = pygame.mixer.Sound("assets/sound/Effect/swing.ogg")
+        self.bonk = pygame.mixer.Sound("assets/sound/Effect/bonk.ogg")
+
     def draw(self, screen):
         curr = self.frames[self.state]
         cur_rect = curr.get_rect(center=self.position)
@@ -20,6 +22,7 @@ class Hammer(ABC):
             self.state += 1
     
     def change_state(self):
+        self.swing.play()
         if (self.state == 0):
             self.state += 1
     
@@ -126,9 +129,3 @@ class Zombie(ABC):
             else:
                 return 0
         return 0
-    
-class Cony(Zombie):
-    def __init__(self, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
-        super().__init__(position, line, resolution, directory)
-        self.move_base = load_zombie_frames(size=self.size)
-        self.move_normal = self.move_sprites
