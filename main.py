@@ -3,7 +3,7 @@ import random
 from settings import *
 from menu import menu
 from classes import *
-
+from fog_particles import *
 pygame.init()
 pygame.mixer.init()
 
@@ -13,10 +13,18 @@ screen = pygame.display.set_mode((chosen_width, chosen_height))
 pygame.display.set_caption("Zombie Whacker")
 clock = pygame.time.Clock()
 
-# hammer_img = pygame.image.load( "assets/image/hammer/hammer1.png" ).convert_alpha()
-# hammer_img = pygame.transform.smoothscale(hammer_img, (48 * chosen_width/BASE_WIDTH, 64 * chosen_width/BASE_WIDTH)) # adjust size
-
 hammer = Hammer(pygame.mouse.get_pos(), (40 * chosen_width/BASE_WIDTH, 40 * chosen_width/BASE_WIDTH))
+hm_hitbox = int(BASE_HITBOX * chosen_width / BASE_WIDTH)
+
+#init pow effect
+pow = pygame.image.load("assets/image/pow.png").convert_alpha()
+pow = pygame.transform.smoothscale(
+        pow,
+        ((BASE_SIZE*0.7*chosen_width/640),
+        (BASE_SIZE*0.7*chosen_width/640)))
+pow = tint_add(pow, (180, 30, 10))
+pow_timer = 0
+pow_pos = (0, 0)
 
 pygame.mouse.set_visible(False)
 
@@ -27,6 +35,13 @@ background = pygame.image.load(
 background = pygame.transform.scale(background, (chosen_width, chosen_height))
 screen.blit(background, (0, 0)) 
 pygame.display.flip()
+
+# Load fog
+fog_images = [
+    pygame.image.load(f"assets/image/fog/fog_{i}.png").convert_alpha()
+    for i in range(1, 9)
+]
+fog_particles,fog_bound = create_fog_wall(fog_images,chosen_width,chosen_height)
 
 # Music tracks
 music_tracks = [
@@ -69,6 +84,9 @@ while running:
             for zom in zomb:
                 if (zom.moving >= 0 or isinstance (zom, Dancer)) and zom.is_hit(mouse_pos, BASE_HITBOX * chosen_width/BASE_WIDTH):
                     score += 1
+                    hammer.bonk.play()
+                    pow_timer = 10
+                    pow_pos = mouse_pos
                     if not isinstance (zom, Dancer):
                         num += zom.change_state("die")
                     elif zom.moving == -1:
@@ -79,7 +97,7 @@ while running:
 
     #play random groans
     if num > 0:
-        magic = random.randint(1, 75)
+        magic = random.randint(1, 360)
         if magic == 1:
             chosen_groan = random.choice(groan_tracks)
             chosen_groan.play()
@@ -89,13 +107,18 @@ while running:
         if isinstance(z, Dancer):
             z.summon()
         z.draw(screen)
+    #draw fog screen
+    for fog in fog_particles:
+        fog.update()
+        fog.draw(screen,fog_bound)
 
     hammer.move(pygame.mouse.get_pos())
     hammer.draw(screen)
-    # mx, my = pygame.mouse.get_pos() 
-    # hammer_rect = hammer_img.get_rect(center=(mx, my))
-    # screen.blit(hammer_img, hammer_rect)
 
+    if pow_timer > 0:
+        rect = pow.get_rect(center=pow_pos)
+        screen.blit(pow, rect)
+        pow_timer -= 1
     pygame.display.flip()
     clock.tick(60)
 

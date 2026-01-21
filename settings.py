@@ -11,6 +11,11 @@ BASE_HITBOX = 30
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 360
 
+#Fog bounds
+FOG_LEFT = 0.79
+FOG_RIGHT = 1.10
+FOG_X = 120
+
 # Frame rate
 FPS = 60
 
