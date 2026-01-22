@@ -1,20 +1,29 @@
+import os
 import pygame
 import random
+import threading
 from settings import *
-from menu import menu
+from menu import *
 from classes import *
 from fog_particles import *
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 pygame.init()
 pygame.mixer.init()
+pygame.font.init()
 
 screen = pygame.display.set_mode((640, 360))
 (chosen_width, chosen_height), difficulty = menu(screen)
 screen = pygame.display.set_mode((chosen_width, chosen_height))
 pygame.display.set_caption("Zombie Whacker")
 clock = pygame.time.Clock()
+font = pygame.font.Font("assets/font/Brianne_s_hand.ttf", 36)
+text_surface = font.render("Loading", True, (255, 255, 255))
+text_rect = text_surface.get_rect(center=(chosen_width // 2, chosen_height // 2))
 
-#put loading screen here
-
+#Put loading screen here:
+finish_loading = False
+def load():
+    global hammer, hm_hitbox, pow, pow_timer, pow_pos, background, fog_images, fog_particles, fog_bound, groan_tracks, score, zomb, num, finish_loading
 
 #preload sprites
 zombie_scaled_size = BASE_SIZE * chosen_width / BASE_WIDTH
@@ -73,13 +82,20 @@ zomb = [Zombie(zombie_mov_frame,zombie_die_frame,line=1, resolution=(chosen_widt
 
 num = 0
 
-#Signal loading screen ready to play
+
 
 # Load background
 background = pygame.image.load(
     "assets/image/background.png"
 ).convert()
 background = pygame.transform.scale(background, (chosen_width, chosen_height))
+
+#Signal loading screen ready to play
+finish_loading = True
+
+loading = threading.Thread(target=load)
+loading.start()
+
 screen.blit(background, (0, 0)) 
 pygame.display.flip()
 
@@ -92,8 +108,36 @@ pygame.mixer.music.set_volume(0.5)
 
 # Main loop
 running = True
+health = 5
 while running:
-    #put check here to check for when zombie pass x=130 the zombie got your brain
+    if not finish_loading:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        
+        #loading screen
+        screen.blit(text_surface, text_rect)
+        pygame.display.flip()
+        clock.tick(60)
+        continue
+    if health == 0:
+        #display end screen
+        end_surface = pygame.image.load("assets/image/menu.png").convert_alpha()
+        tb_w, tb_h = end_surface.get_size()
+        end_surface = pygame.transform.smoothscale(
+            end_surface,
+            (int(tb_w * TEXTBOX_SCALE * chosen_width / BASE_WIDTH), int(tb_h * TEXTBOX_SCALE * chosen_width / BASE_WIDTH))
+        )
+        end_rect = end_surface.get_rect(center=(chosen_width // 2, chosen_height // 2))
+        screen.blit(end_surface, end_rect)
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    health = 5
+                    #reset zombies' state
+        pygame.display.flip()
+        clock.tick(60)
+        continue
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -122,8 +166,15 @@ while running:
             chosen_groan.play()
     for z in zomb:
         num += z.spawn(resolution=(chosen_width, chosen_height))
-        z.move(-0.5, 0)
-        if isinstance(z, Dancer) and z.moving != -1:
+        hehe = z.move(-0.5, 0)
+        if hehe is not None and hehe < 0:
+            num -= 1
+            score += hehe if isinstance(z, Dancer) else -1
+            print(f"U got invaded! Score: {score}")
+            health -= 1
+            if health <= 0: 
+                continue
+        if isinstance(z, Dancer):
             z.summon()
         z.draw(screen)
     #draw fog screen
@@ -131,14 +182,13 @@ while running:
         fog.update()
         fog.draw(screen,fog_bound)
 
+    hammer.move(pygame.mouse.get_pos())
+    hammer.draw(screen)
+
     if pow_timer > 0:
         rect = pow.get_rect(center=pow_pos)
         screen.blit(pow, rect)
         pow_timer -= 1
-
-    hammer.move(pygame.mouse.get_pos())
-    hammer.draw(screen)
-
     pygame.display.flip()
     clock.tick(60)
 
