@@ -30,11 +30,11 @@ dim = pygame.Surface(background.get_size())
 dim.set_alpha(150)
 dim.fill((0, 0, 0))
 
-end_surface = pygame.image.load("assets/image/menu.png").convert_alpha()
+end_surface = pygame.image.load("assets/image/YOULOSE.png").convert_alpha()
 tb_w, tb_h = end_surface.get_size()
 end_surface = pygame.transform.smoothscale(
     end_surface,
-    (int(tb_w * TEXTBOX_SCALE * chosen_width / BASE_WIDTH), int(tb_h * TEXTBOX_SCALE * chosen_width / BASE_WIDTH))
+    (int(tb_w * 0.5 * TEXTBOX_SCALE * chosen_width / BASE_WIDTH), int(tb_h * 0.5 * TEXTBOX_SCALE * chosen_width / BASE_WIDTH))
 )
 end_rect = end_surface.get_rect(center=(chosen_width // 2, chosen_height // 2))
 end_text = pygame.font.Font("assets/font/Brianne_s_hand.ttf", 45)
@@ -161,7 +161,6 @@ while running:
         screen.blit(background, (0, 0))
         screen.blit(dim, (0, 0))
         screen.blit(end_surface, end_rect)
-        screen.blit(end_text_surface, end_text_rect)
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
