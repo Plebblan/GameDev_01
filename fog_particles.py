@@ -30,7 +30,7 @@ class FogParticle:
 
 def create_fog_wall(fog_images,chosen_width,chosen_height):
     fog_particles = []
-    lanes = [int(y * chosen_height/360) for y in BASE_Y]
+    lanes = [115]+[int(y * chosen_height/360) for y in BASE_Y]
     fog_bound = pygame.Rect(
         FOG_X * chosen_width/640,
         0,

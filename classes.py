@@ -3,9 +3,13 @@ import random
 from utils import *
 from abc import ABC
 from settings import *
+
+dirt_sprites = []
+zom_frame = None
+
 class Hammer(ABC):
-    def __init__(self, position = (0, 0), size=(BASE_HAMMER, BASE_HAMMER), directory="assets/image/hammer"):
-        self.frames = load_hammer_frames(directory, size)
+    def __init__(self, frames, position = (0, 0), size=(BASE_HAMMER, BASE_HAMMER)):
+        self.frames = frames
         self.position = position
         self.state = 0
         self.swing = pygame.mixer.Sound("assets/sound/Effect/swing.ogg")
@@ -29,7 +33,7 @@ class Hammer(ABC):
         self.position = pos
 
 class Zombie(ABC):
-    def __init__(self, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
+    def __init__(self, mov, die, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
         """
         Initialize a Zombie instance.
         
@@ -41,8 +45,8 @@ class Zombie(ABC):
         """
         self.position = (self.scale(resolution, BASE_X), self.scale(resolution, BASE_Y[line - 1]))
         self.size = self.scale(resolution, BASE_SIZE)
-        self.move_sprites = load_zombie_frames(directory, "move", self.size)
-        self.dead_sprites = load_zombie_frames(directory, "die", self.size)
+        self.move_sprites = mov
+        self.dead_sprites = die
         self.image = pygame.Surface((self.size, self.size))
         self.moving = -1 #index for move animation
         self.dying = -1 #index for dead animation
@@ -130,10 +134,10 @@ class Zombie(ABC):
                 return 0
         return 0
 class Creep(Zombie):
-    def __init__(self, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/creep_backup"):
-        super().__init__(position, line, resolution, directory)
+    def __init__(self, mov, die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
+        super().__init__(mov, die, position, line, resolution)
         self.summoned_flag = True
-        self.dirt_sprites, self.zom_frame = create_summon_sprites(self.size)
+        self.dirt_sprites, self.zom_frame = dirt_sprites, zom_frame
         self.summon_idx = -1
 
     def is_summoned(self):
@@ -218,12 +222,14 @@ class Creep(Zombie):
 
         
 class Dancer(Zombie):
-    def __init__(self, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/dancer"):
-        super().__init__(position, line, resolution, directory)
-        self.creeps = [Creep(position, line + 1, resolution, "assets/image/creep_backup"), 
-                  Creep(position, line - 1, resolution, "assets/image/creep_backup"), 
-                  Creep(position + self.scale(resolution, BASE_SIZE*1.5), line, resolution, "assets/image/creep_backup"), 
-                  Creep(position - self.scale(resolution, BASE_SIZE*1.5), line, resolution, "assets/image/creep_backup")
+    def __init__(self, mov, die, sub_mov, sub_die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
+        super().__init__(mov, die, position, line, resolution)
+        global dirt_sprites, zom_frame 
+        dirt_sprites, zom_frame = create_summon_sprites(self.size)
+        self.creeps = [Creep(sub_mov, sub_die, position, line + 1, resolution), 
+                  Creep(sub_mov, sub_die, position, line - 1, resolution), 
+                  Creep(sub_mov, sub_die, position + self.scale(resolution, BASE_SIZE*1.2), line, resolution), 
+                  Creep(sub_mov, sub_die, position - self.scale(resolution, BASE_SIZE*1.2), line, resolution)
                   ]
         self.summon_creep = []
         self.summon_flag = False
