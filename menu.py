@@ -15,12 +15,10 @@ RESOLUTIONS = [
 DIFFICULTIES = ["Easy", "Normal", "Hard"]
 TEXTBOX_SCALE = 1.2
 
-def menu(screen):
+def menu(screen,background):
     clock = pygame.time.Clock()
 
-    background = pygame.image.load(
-        "assets/image/back.jpg"
-    ).convert()
+    background = background
 
     bg_w, bg_h = screen.get_size()
     background = pygame.transform.smoothscale(
