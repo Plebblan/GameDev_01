@@ -237,8 +237,6 @@ class Creep(Zombie):
 class Dancer(Zombie):
     def __init__(self, mov, die, sub_mov, sub_die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
         super().__init__(mov, die, position, line, resolution)
-        global dirt_sprites, zom_frame 
-        dirt_sprites, zom_frame = create_summon_sprites(self.size)
         self.creeps = [Creep(sub_mov, sub_die, position, line + 1, resolution), 
                   Creep(sub_mov, sub_die, position, line - 1, resolution), 
                   Creep(sub_mov, sub_die, position + self.scale(resolution, BASE_SIZE*1.2), line, resolution), 
