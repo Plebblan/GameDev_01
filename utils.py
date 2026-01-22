@@ -41,7 +41,7 @@ def create_summon_sprites(size = 60):
         real_file = os.path.join(file_path, file)
         if os.path.exists(real_file): 
             img = pygame.image.load(real_file).convert_alpha()
-            summon_sprites.append(pygame.transform.scale(img, (size/1.4, size/1.4)))
+            summon_sprites.append(pygame.transform.scale(img, (size/1.5, size/1.5)))
         else:
             print(f"Lỗi: Không tìm thấy file {real_file}")
     gl_summon_sprites = summon_sprites

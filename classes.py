@@ -3,9 +3,13 @@ import random
 from utils import *
 from abc import ABC
 from settings import *
+
+dirt_sprites = []
+zom_frame = None
+
 class Hammer(ABC):
-    def __init__(self, position = (0, 0), size=(BASE_HAMMER, BASE_HAMMER), directory="assets/image/hammer"):
-        self.frames = load_hammer_frames(directory, size)
+    def __init__(self, frames, position = (0, 0), size=(BASE_HAMMER, BASE_HAMMER)):
+        self.frames = frames
         self.position = position
         self.state = 0
         self.swing = pygame.mixer.Sound("assets/sound/Effect/swing.ogg")
@@ -29,7 +33,7 @@ class Hammer(ABC):
         self.position = pos
 
 class Zombie(ABC):
-    def __init__(self, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/basic"):
+    def __init__(self, mov, die, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
         """
         Initialize a Zombie instance.
         
@@ -41,8 +45,8 @@ class Zombie(ABC):
         """
         self.position = (self.scale(resolution, BASE_X), self.scale(resolution, BASE_Y[line - 1]))
         self.size = self.scale(resolution, BASE_SIZE)
-        self.move_sprites = load_zombie_frames(directory, "move", self.size)
-        self.dead_sprites = load_zombie_frames(directory, "die", self.size)
+        self.move_sprites = mov
+        self.dead_sprites = die
         self.image = pygame.Surface((self.size, self.size))
         self.moving = -1 #index for move animation
         self.dying = -1 #index for dead animation
@@ -74,6 +78,9 @@ class Zombie(ABC):
     def move(self, dx, dy):
         if self.moving >= 0:
             self.position = (self.position[0] + dx, self.position[1] + dy)
+            if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
+                self.change_state("hurt")
+                return -1
         else: 
             self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
@@ -107,6 +114,10 @@ class Zombie(ABC):
             self.moving = -1
             self.dying = 0
             return -1
+        elif state == "hurt":
+            self.moving = -1
+            self.dying = -1
+            return -1
         else:
             return 0
             self.moving = 0
@@ -130,8 +141,8 @@ class Zombie(ABC):
                 return 0
         return 0
 class Creep(Zombie):
-    def __init__(self, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/creep_backup"):
-        super().__init__(position, line, resolution, directory)
+    def __init__(self, mov, die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
+        super().__init__(mov, die, position, line, resolution)
         self.summoned_flag = True
         self.summon_sprites = create_summon_sprites(self.size)
         self.summon_idx = -1
@@ -141,9 +152,12 @@ class Creep(Zombie):
     
     def move(self, dx, dy):
         if self.summoned_flag == False:
-            None
+            pass
         elif self.moving >= 0:
             self.position = (self.position[0] + dx, self.position[1] + dy)
+            if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
+                self.change_state("hurt")
+                return -1
         else: 
             self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
@@ -169,6 +183,7 @@ class Creep(Zombie):
                 else:
                     self.dying = -1
             self.update = 3
+
     def draw(self, screen):
         if self.dying == -1:
             return
@@ -186,6 +201,7 @@ class Creep(Zombie):
             self.dying = 0
             return 1
         elif state == "die":
+            self.summoned_flag = True
             self.moving = -1
             self.dying = 0
             return -1
@@ -194,10 +210,15 @@ class Creep(Zombie):
             self.summon_idx = 0
             self.moving = 0
             self.dying = 0
+        elif state == "hurt":
+            self.summoned_flag = True
+            self.moving = -1
+            self.dying = -1
         else:
             return 0
             self.moving = 0
             self.dying = 0
+
     def set(self, position, idx = 0):
         if idx == 0:
             self.position = position[0], position[1] - self.scale(self.resolution, BASE_Y[1]-BASE_Y[0])
@@ -214,22 +235,23 @@ class Creep(Zombie):
 
         
 class Dancer(Zombie):
-    def __init__(self, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), directory="assets/image/dancer"):
-        super().__init__(position, line, resolution, directory)
-        self.creeps = [Creep(position, line + 1, resolution, "assets/image/creep_backup"), 
-                  Creep(position, line - 1, resolution, "assets/image/creep_backup"), 
-                  Creep(position + self.scale(resolution, BASE_SIZE*1.5), line, resolution, "assets/image/creep_backup"), 
-                  Creep(position - self.scale(resolution, BASE_SIZE*1.5), line, resolution, "assets/image/creep_backup")
+    def __init__(self, mov, die, sub_mov, sub_die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
+        super().__init__(mov, die, position, line, resolution)
+        self.creeps = [Creep(sub_mov, sub_die, position, line + 1, resolution), 
+                  Creep(sub_mov, sub_die, position, line - 1, resolution), 
+                  Creep(sub_mov, sub_die, position + self.scale(resolution, BASE_SIZE*1.2), line, resolution), 
+                  Creep(sub_mov, sub_die, position - self.scale(resolution, BASE_SIZE*1.2), line, resolution)
                   ]
         self.summon_creep = []
         self.summon_flag = False
-        self.cd = 20
+        self.cd = 0
+        self.up_to_len = True
 
     def summon(self):
         if self.cd > 0:
             self.cd -= 1
             return
-        self.cd = 360
+        self.cd = 2
         if self.moving == -1:
             return
         for idx, creep in enumerate(self.creeps):
@@ -241,18 +263,28 @@ class Dancer(Zombie):
                     self.summon_flag = True
 
     def move(self, dx, dy):
+        ret = 0
         if self.moving >= 0:
-            self.position = (self.position[0] + dx, self.position[1] + dy) if not self.summon_flag else self.position
+            self.position = (self.position[0] + dx/(0.5*int(not self.up_to_len) + 1), self.position[1] + dy) if not self.summon_flag else self.position
+            if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
+                self.change_state("hurt")
+                ret -=1
         else: 
             self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
         if self.update < 0:
-            if self.moving >= 0:
+            if self.summon_flag:
+                None
+            elif self.moving >= 0:
                 self.image = self.move_sprites[self.moving]
-                if self.moving < len(self.move_sprites) - 1:
+                if self.moving == 32 :
+                    self.summon()
+                if self.moving < len(self.move_sprites) - 1 and self.up_to_len:
                     self.moving += 1  # Advance to next move sprite
-                else:
-                    self.moving = 0  # Loop back to first move sprite
+                elif self.moving >= 0:
+                    self.up_to_len = False if self.moving > 0 else True
+                    if not self.up_to_len:
+                        self.moving -= 1  # Loop back to first move sprite
             elif self.dying >= 0: #dying animation
                 self.image = self.dead_sprites[self.dying]
                 if self.dying < len(self.dead_sprites) - 1:
@@ -260,8 +292,11 @@ class Dancer(Zombie):
                 else:
                     self.dying = -1
             self.update = 3
-        for creep in self.creeps:
-            creep.move(dx, dy)
+        for idx, creep in enumerate(self.creeps):
+            if creep.move(dx, dy) == -1:
+                ret -= 1
+                self.summon_creep.remove(idx)
+        return ret
 
     def draw(self, screen):
         for creep in self.creeps:
@@ -269,8 +304,11 @@ class Dancer(Zombie):
         if self.dying == -1:
             return
         self.summon_flag = not all(creep.is_summoned() for creep in self.creeps)
-
-        screen.blit(self.image, (self.position[0] - self.size // 2, self.position[1] - self.size))
+        real_image = pygame.transform.flip(self.image, True, False) if self.moving < 31 else self.image
+        boundind_rect = real_image.get_bounding_rect()
+        rect = real_image.get_rect()
+        real_image = real_image.subsurface((boundind_rect[0], rect[1], boundind_rect[2], rect[3])).copy()
+        screen.blit(real_image, (self.position[0] - self.size // 2, self.position[1] - self.size))
 
     def is_hit(self, mouse_pos, hm_hitbox):
         cur = (self.position[0] - self.size // 2, self.position[1] - self.size)
