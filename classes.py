@@ -151,7 +151,7 @@ class Creep(Zombie):
             if self.summoned_flag == False and self.summon_idx >= 0:
                 self.image = self.summon_sprites[int(self.summon_idx)]
                 if self.summon_idx < len(self.summon_sprites) - 1:
-                    self.summon_idx += 0.3
+                    self.summon_idx += 0.5
                 else:
                     self.summon_idx = -1  
                     self.summoned_flag = True
