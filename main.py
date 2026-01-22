@@ -45,6 +45,7 @@ end_text_rect = end_text_surface.get_rect(center=(end_rect.centerx, end_rect.cen
 finish_loading = False
 def load():
     global hammer, hm_hitbox, pow, pow_timer, pow_pos, fog_images, fog_particles, fog_bound, groan_tracks, score, zomb, num, finish_loading, music_tracks, health_bar, health_coord
+    global clock_img, clock_rect, start_time
 
     #preload sprites
     zombie_scaled_size = BASE_SIZE * chosen_width / BASE_WIDTH
@@ -105,6 +106,20 @@ def load():
 
     num = 0
 
+    # Load and record start timer
+    clock_img = pygame.image.load("assets/image/clock.png").convert_alpha()
+    cw, ch = clock_img.get_size()
+    clock_img = pygame.transform.smoothscale(
+        clock_img,
+        (int(cw * 0.15 * chosen_width/640), int(ch * 0.15 * chosen_width/640))
+    )
+
+    clock_rect = clock_img.get_rect(
+    topright=(chosen_width + clock_img.get_width()//6, -clock_img.get_height()//6)
+    )
+
+    start_time = pygame.time.get_ticks()
+
     # Pick and play random track
     chosen_track = random.choice(music_tracks)
     pygame.mixer.music.load(chosen_track)
@@ -133,6 +148,14 @@ while running:
         pygame.display.flip()
         clock.tick(60)
         continue
+    total = (pygame.time.get_ticks() - start_time) // 1000
+    hours = total // 3600
+    minutes = (total % 3600) // 60
+    seconds = total % 60
+    time_str = f"{hours:02}:{minutes:02}:{seconds:02}"
+
+    timer_text = font.render(time_str, True, (220, 200, 80))
+    timer_rect = timer_text.get_rect(center=clock_rect.center)
     if health <= 0:
         #display end screen
         screen.blit(background, (0, 0))
@@ -203,6 +226,9 @@ while running:
     for fog in fog_particles:
         fog.update()
         fog.draw(screen,fog_bound)
+
+    screen.blit(clock_img, clock_rect)
+    screen.blit(timer_text, timer_rect)
 
     hammer.move(pygame.mouse.get_pos())
     hammer.draw(screen)
