@@ -7,6 +7,8 @@ from settings import *
 dirt_sprites = []
 zom_frame = None
 
+SPEED_UPDATE = 1.5
+
 class Hammer(ABC):
     def __init__(self, frames, position = (0, 0), size=(BASE_HAMMER, BASE_HAMMER)):
         self.frames = frames
@@ -33,7 +35,7 @@ class Hammer(ABC):
         self.position = pos
 
 class Zombie(ABC):
-    def __init__(self, mov, die, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
+    def __init__(self, mov, die, position= BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), speed=1):
         """
         Initialize a Zombie instance.
         
@@ -52,6 +54,7 @@ class Zombie(ABC):
         self.dying = -1 #index for dead animation
         self.update = 0
         self.resolution = resolution
+        self.speed = speed
 
     def draw(self, screen):
         """
@@ -77,12 +80,10 @@ class Zombie(ABC):
     
     def move(self, dx, dy):
         if self.moving >= 0:
-            self.position = (self.position[0] + dx, self.position[1] + dy)
+            self.position = (self.position[0] + dx * self.speed, self.position[1] + dy * self.speed)
             if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
                 self.change_state("hurt")
                 return -1
-        else: 
-            self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
         if self.update < 0:
             if self.moving >= 0:
@@ -97,7 +98,7 @@ class Zombie(ABC):
                     self.dying += 1  # Advance to next dead sprite
                 else:
                     self.dying = -1
-            self.update = 3
+            self.update = int(SPEED_UPDATE / (-dx*self.speed))
 
     def change_state(self, state=None):
         """
@@ -128,7 +129,6 @@ class Zombie(ABC):
         hm_LD  = mouse_pos[0] - cur[0] - hm_hitbox // 2, mouse_pos[1] - cur[1] - hm_hitbox // 2
         hammer_rect = pygame.Rect(hm_LD[0], hm_LD[1], hm_hitbox / 2, hm_hitbox / 2)
         bounding_rect = self.image.get_bounding_rect()
-        # return hm_LD[0] + hm_hitbox - 10 > bounding_rect[0] and bounding_rect[0] + bounding_rect[2] > hm_LD[0] - 10 and hm_LD[1] + hm_hitbox > bounding_rect[1] and bounding_rect[1] + bounding_rect[3] > hm_LD[1]
         return hammer_rect.colliderect(bounding_rect)
     
     def spawn(self, resolution=(BASE_WIDTH, BASE_HEIGHT)):
@@ -140,9 +140,12 @@ class Zombie(ABC):
             else:
                 return 0
         return 0
+    
+    def reset(self):
+        self.change_state("hurt")
 class Creep(Zombie):
-    def __init__(self, mov, die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
-        super().__init__(mov, die, position, line, resolution)
+    def __init__(self, mov, die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), speed=1.3):
+        super().__init__(mov, die, position, line, resolution, speed)
         self.summoned_flag = True
         self.summon_sprites = create_summon_sprites(self.size)
         self.summon_idx = -1
@@ -154,12 +157,10 @@ class Creep(Zombie):
         if self.summoned_flag == False:
             pass
         elif self.moving >= 0:
-            self.position = (self.position[0] + dx, self.position[1] + dy)
+            self.position = (self.position[0] + dx * self.speed, self.position[1] + dy * self.speed)
             if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
                 self.change_state("hurt")
                 return -1
-        else: 
-            self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
         if self.update < 0:
             if self.summoned_flag == False and self.summon_idx >= 0:
@@ -182,7 +183,7 @@ class Creep(Zombie):
                     self.dying += 1  # Advance to next dead sprite
                 else:
                     self.dying = -1
-            self.update = 3
+            self.update = int(SPEED_UPDATE / (-dx*self.speed))
 
     def draw(self, screen):
         if self.dying == -1:
@@ -235,8 +236,8 @@ class Creep(Zombie):
 
         
 class Dancer(Zombie):
-    def __init__(self, mov, die, sub_mov, sub_die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT)):
-        super().__init__(mov, die, position, line, resolution)
+    def __init__(self, mov, die, sub_mov, sub_die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), speed=1):
+        super().__init__(mov, die, position, line, resolution, speed)
         self.creeps = [Creep(sub_mov, sub_die, position, line + 1, resolution), 
                   Creep(sub_mov, sub_die, position, line - 1, resolution), 
                   Creep(sub_mov, sub_die, position + self.scale(resolution, BASE_SIZE*1.2), line, resolution), 
@@ -269,8 +270,6 @@ class Dancer(Zombie):
             if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
                 self.change_state("hurt")
                 ret -=1
-        else: 
-            self.position = (self.position[0] + dx / 4, self.position[1] + dy)
         self.update-=1
         if self.update < 0:
             if self.summon_flag:
@@ -304,7 +303,7 @@ class Dancer(Zombie):
         if self.dying == -1:
             return
         self.summon_flag = not all(creep.is_summoned() for creep in self.creeps)
-        real_image = pygame.transform.flip(self.image, True, False) if self.moving < 31 else self.image
+        real_image = pygame.transform.flip(self.image, True, False) if 0 <= self.moving < 31 else self.image
         boundind_rect = real_image.get_bounding_rect()
         rect = real_image.get_rect()
         real_image = real_image.subsurface((boundind_rect[0], rect[1], boundind_rect[2], rect[3])).copy()
@@ -341,3 +340,9 @@ class Dancer(Zombie):
             else:
                 return 0
         return 0
+    
+    def reset(self):
+        self.change_state("hurt")
+        self.summon_creep.clear()
+        for creep in self.creeps:
+            creep.change_state("hurt")

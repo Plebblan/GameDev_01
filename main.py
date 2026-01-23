@@ -173,6 +173,10 @@ while running:
                     pygame.mixer.music.load(chosen_track)
                     pygame.mixer.music.play(-1)
 
+                    #RESET ZOMBIES
+                    for z in zomb:
+                        z.reset()
+
         # DRAW STATES
         if state == "death_anim":
             screen.blit(background, (0, 0))
@@ -259,7 +263,7 @@ while running:
             groan_tracks[magic - 1].play()
     for z in zomb:
         num += z.spawn(resolution=(chosen_width, chosen_height))
-        hehe = z.move(-0.5, 0)
+        hehe = z.move(-1, 0)
         if hehe is not None and hehe < 0:
             num -= 1
             print(f"U got invaded! Score: {score}")
