@@ -77,7 +77,7 @@ class Zombie(ABC):
         :param resolution: current screen resolution
         :param value: value to be scaled
         """
-        value = int(value * resolution[0] / BASE_WIDTH)
+        value = value * resolution[0] / BASE_WIDTH
         return value
     
     def move(self, dx, dy):

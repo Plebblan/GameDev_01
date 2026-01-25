@@ -10,6 +10,12 @@ HURT_BASE = 110
 HEALTH_COORD = (140, 70)
 BASE_HEALTH = 100
 
+SPEED = {
+    "Easy": (1.0, 0.1, 10),
+    "Normal": (1.5, 0.2, 9),
+    "Hard": (2.0, 0.3, 8)
+}
+
 # Default window resolution (will be overwritten by menu)
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 360

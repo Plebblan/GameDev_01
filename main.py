@@ -143,7 +143,10 @@ miss = 0
 # Main loop
 running = True
 health = 5
+base_ceil, step, interval = SPEED.get(difficulty)
+ceil = base_ceil
 while running:
+    dx = (ceil / 10) * random.randint(1, 10)
     if not finish_loading:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -293,7 +296,7 @@ while running:
             groan_tracks[magic - 1].play()
     for z in zomb:
         num += z.spawn(resolution=(chosen_width, chosen_height))
-        hehe = z.move(-1, 0)
+        hehe = z.move(-dx, 0)
         if hehe is not None and hehe < 0:
             num -= 1
             print(f"U got invaded! Score: {score}")
@@ -320,6 +323,8 @@ while running:
         screen.blit(pow, rect)
         pow_timer -= 1
     pygame.display.flip()
+    cur_time = pygame.time.get_ticks()
+    ceil = base_ceil + step * (((cur_time - start_time) // 1000) // interval)
     clock.tick(60)
 
 pygame.quit()
