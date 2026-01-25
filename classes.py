@@ -7,7 +7,9 @@ from settings import *
 dirt_sprites = []
 zom_frame = None
 
-SPEED_UPDATE = 1.5
+Time_update = 0.5
+
+SCALE_DANCER_OVER_BASIC = 0.6
 
 class Hammer(ABC):
     def __init__(self, frames, position = (0, 0), size=(BASE_HAMMER, BASE_HAMMER)):
@@ -80,7 +82,7 @@ class Zombie(ABC):
     
     def move(self, dx, dy):
         if self.moving >= 0:
-            self.position = (self.position[0] + dx * self.speed, self.position[1] + dy * self.speed)
+            self.position = (self.position[0] + self.scale(self.resolution, dx) * self.speed, self.position[1] + dy * self.speed)
             if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
                 self.change_state("hurt")
                 return -1
@@ -98,7 +100,7 @@ class Zombie(ABC):
                     self.dying += 1  # Advance to next dead sprite
                 else:
                     self.dying = -1
-            self.update = int(SPEED_UPDATE / (-dx*self.speed))
+            self.update = int(Time_update / (-self.scale(self.resolution, dx)/self.speed))
 
     def change_state(self, state=None):
         """
@@ -144,7 +146,7 @@ class Zombie(ABC):
     def reset(self):
         self.change_state("hurt")
 class Creep(Zombie):
-    def __init__(self, mov, die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), speed=1.3):
+    def __init__(self, mov, die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), speed=0.6):
         super().__init__(mov, die, position, line, resolution, speed)
         self.summoned_flag = True
         self.summon_sprites = create_summon_sprites(self.size)
@@ -157,7 +159,7 @@ class Creep(Zombie):
         if self.summoned_flag == False:
             pass
         elif self.moving >= 0:
-            self.position = (self.position[0] + dx * self.speed, self.position[1] + dy * self.speed)
+            self.position = (self.position[0] + self.scale(self.resolution, dx) * self.speed, self.position[1] + dy * self.speed)
             if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
                 self.change_state("hurt")
                 return -1
@@ -183,7 +185,7 @@ class Creep(Zombie):
                     self.dying += 1  # Advance to next dead sprite
                 else:
                     self.dying = -1
-            self.update = int(SPEED_UPDATE / (-dx*self.speed))
+            self.update = int(Time_update / (-self.scale(self.resolution, dx)/self.speed))
 
     def draw(self, screen):
         if self.dying == -1:
@@ -236,7 +238,7 @@ class Creep(Zombie):
 
         
 class Dancer(Zombie):
-    def __init__(self, mov, die, sub_mov, sub_die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), speed=1):
+    def __init__(self, mov, die, sub_mov, sub_die, position=BASE_X, line=1, resolution=(BASE_WIDTH, BASE_HEIGHT), speed=0.5):
         super().__init__(mov, die, position, line, resolution, speed)
         self.creeps = [Creep(sub_mov, sub_die, position, line + 1, resolution), 
                   Creep(sub_mov, sub_die, position, line - 1, resolution), 
@@ -266,13 +268,13 @@ class Dancer(Zombie):
     def move(self, dx, dy):
         ret = 0
         if self.moving >= 0:
-            self.position = (self.position[0] + dx/(0.5*int(not self.up_to_len) + 1), self.position[1] + dy) if not self.summon_flag else self.position
+            self.position = (self.position[0] + self.scale(self.resolution, dx)/(self.speed*(2*int(not self.up_to_len)) + 1), self.position[1] + dy) if not self.summon_flag and self.moving < 63 and not (28 <= self.moving <= 47) else self.position
             if self.position[0] <= HURT_BASE * self.resolution[0] / BASE_WIDTH:
                 self.change_state("hurt")
                 ret -=1
-        self.update-=1
+        self.update -= 1
         if self.update < 0:
-            if self.summon_flag:
+            if self.summon_flag and self.moving >= 0:
                 None
             elif self.moving >= 0:
                 self.image = self.move_sprites[self.moving]
@@ -290,7 +292,7 @@ class Dancer(Zombie):
                     self.dying += 1  # Advance to next dead sprite
                 else:
                     self.dying = -1
-            self.update = 3
+            self.update = int((Time_update/SCALE_DANCER_OVER_BASIC) / (-self.scale(self.resolution, dx)/self.speed))
         for idx, creep in enumerate(self.creeps):
             if creep.move(dx, dy) == -1:
                 ret -= 1
