@@ -149,7 +149,7 @@ def menu(screen,background):
         start_text = font_button.render("START", True, (255, 255, 255))
         start_rect = start_text.get_rect(
             centerx=base_w // 2,
-            bottom=textbox_rect.bottom - 25
+            bottom=textbox_rect.bottom - 35
         )
         screen.blit(start_text, start_rect)
 

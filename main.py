@@ -18,7 +18,9 @@ screen = pygame.display.set_mode((chosen_width, chosen_height))
 pygame.display.set_caption("Zombie Whacker")
 clock = pygame.time.Clock()
 font = pygame.font.Font("assets/font/Brianne_s_hand.ttf", 36)
+small_font = pygame.font.Font("assets/font/Brianne_s_hand.ttf",int(24 * chosen_width / BASE_WIDTH))
 text_surface = font.render("Loading", True, (255, 255, 255))
+font = pygame.font.Font("assets/font/Brianne_s_hand.ttf", int (36 * chosen_width / BASE_WIDTH))
 text_rect = text_surface.get_rect(center=(chosen_width // 2, chosen_height // 2))
 # Load background
 background = pygame.image.load(
@@ -135,6 +137,8 @@ def load():
 loading = threading.Thread(target=load)
 loading.start()
 score = 0
+hit = 0
+miss = 0
 
 # Main loop
 running = True
@@ -167,6 +171,8 @@ while running:
                     state = "playing"
                     health = 5
                     score = 0
+                    hit = 0
+                    miss = 0
                     num = 0
                     start_time = pygame.time.get_ticks()
                     chosen_track = random.choice(music_tracks)
@@ -204,8 +210,25 @@ while running:
             screen.blit(end_bg, (0, 0))
 
             final_score = final_time * 10 + score * 20
-            screen.blit(font.render(f"Score: {final_score}", True, (255,230,120)),
-                        (chosen_width//2 - 80, chosen_height//2))
+            text = font.render(f"Score: {final_score}", True, (255,230,120))
+            rect = text.get_rect(center=(440 * chosen_width / BASE_WIDTH, 95 * chosen_height / BASE_HEIGHT))
+            screen.blit(text, rect)
+
+            text = small_font.render(f"Time survived: {final_time}", True, (255,230,120))
+            rect = text.get_rect(center=(440 * chosen_width / BASE_WIDTH, 125 * chosen_height / BASE_HEIGHT))
+            screen.blit(text, rect)
+
+            text = small_font.render(f"Zombies hit: {score}", True, (255,230,120))
+            rect = text.get_rect(center=(435 * chosen_width / BASE_WIDTH, 155 * chosen_height / BASE_HEIGHT))
+            screen.blit(text, rect)
+
+            if hit != 0:
+                accuracy = hit/(miss+hit) * 100
+            else:
+                accuracy = 0
+            text = small_font.render(f"Accuracy: {accuracy:.2f}%", True, (255,230,120))
+            rect = text.get_rect(center=(440 * chosen_width / BASE_WIDTH, 185 * chosen_height / BASE_HEIGHT))
+            screen.blit(text, rect)
 
         pygame.display.flip()
         clock.tick(60)
@@ -232,17 +255,24 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             hammer.change_state()
             mouse_pos = event.pos
+            clicked_hit = False
             for zom in zomb:
                 if (zom.moving >= 0 or isinstance (zom, Dancer)) and zom.is_hit(mouse_pos, BASE_HITBOX * chosen_width/BASE_WIDTH):
-                    score += 10
+                    score += 1
                     hammer.bonk.play()
                     pow_timer = 6
+                    clicked_hit = True
                     pow_pos = mouse_pos
                     if not isinstance (zom, Dancer):
                         num += zom.change_state("die")
                     elif zom.moving == -1:
                         num -= 1
                     print(f"Hit! Score: {score}")
+            if clicked_hit:
+                hit += 1
+            else: 
+                miss += 1
+
     # Draw background every frame
     screen.blit(background, (0, 0))
     match health:
